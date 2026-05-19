@@ -1,7 +1,7 @@
 import { j as jsxRuntimeExports, r as reactExports } from "../_libs/react.mjs";
 import { l as logo } from "./hospiq-logo-Df3vBjLG.mjs";
 import { s as supabase } from "./supabase-D0WzKadW.mjs";
-import { X as Sparkles, A as ArrowRight, n as CirclePlay, a2 as TrendingUp, P as Phone, J as MessageCircle, C as Calendar, K as Mic, e as Building2, a7 as UtensilsCrossed, p as Coffee, a1 as TreePalm, f as CalendarCheck, B as BookOpen, c as Bot, H as Headphones, T as Search, D as Database, g as ChartColumn, V as Share2, W as Smartphone, L as Languages, o as Clock, m as CircleCheck, a as ArrowUpRight, b as Award, a9 as Zap, E as Earth, N as MousePointerClick, v as LifeBuoy, O as Network, _ as Star, h as Check, Q as Plus, M as Mail, x as LoaderCircle, I as Instagram, w as Linkedin, a3 as Twitter } from "../_libs/lucide-react.mjs";
+import { $ as Sparkles, A as ArrowRight, n as CirclePlay, a6 as TrendingUp, S as Phone, K as MessageCircle, C as Calendar, O as Mic, f as Building2, aa as UtensilsCrossed, q as Coffee, a5 as TreePalm, g as CalendarCheck, c as BookOpen, d as Bot, H as Headphones, W as Search, D as Database, h as ChartColumn, Y as Share2, _ as Smartphone, L as Languages, p as Clock, m as CircleCheck, a as ArrowUpRight, b as Award, ac as Zap, E as Earth, P as MousePointerClick, w as LifeBuoy, Q as Network, a2 as Star, i as Check, T as Plus, M as Mail, y as LoaderCircle, I as Instagram, x as Linkedin, a7 as Twitter } from "../_libs/lucide-react.mjs";
 import "../_libs/supabase__supabase-js.mjs";
 import "../_libs/supabase__postgrest-js.mjs";
 import "../_libs/supabase__realtime-js.mjs";

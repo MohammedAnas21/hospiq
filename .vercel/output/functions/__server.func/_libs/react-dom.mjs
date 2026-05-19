@@ -2,7 +2,7 @@ import require$$0 from "util";
 import require$$1 from "crypto";
 import require$$2 from "async_hooks";
 import require$$5 from "stream";
-import { b as requireReact, g as getDefaultExportFromCjs } from "./react.mjs";
+import { a as requireReact, g as getDefaultExportFromCjs } from "./react.mjs";
 var reactDom = { exports: {} };
 var reactDom_production = {};
 var hasRequiredReactDom_production;
