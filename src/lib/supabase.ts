@@ -60,6 +60,7 @@ export type Invoice = {
   invoice_number?: string;
   client_id: string;
   project_id?: string;
+  currency?: "USD" | "INR";
   items: InvoiceItem[];
   subtotal?: number;
   tax?: number;

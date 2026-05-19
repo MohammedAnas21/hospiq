@@ -19,6 +19,22 @@ const S = {
 
 const emptyItem: InvoiceItem = { description: "", quantity: 1, rate: 0, amount: 0 };
 
+const CURRENCIES = [
+  { value: "USD", label: "USD — US Dollar", symbol: "$" },
+  { value: "INR", label: "INR — Indian Rupee", symbol: "₹" },
+] as const;
+
+function sym(currency?: string) {
+  return currency === "INR" ? "₹" : "$";
+}
+
+function fmt(amount: number, currency?: string) {
+  if (currency === "INR") {
+    return "₹" + amount.toLocaleString("en-IN");
+  }
+  return "$" + amount.toLocaleString("en-US");
+}
+
 function Toast({ msg, type }: { msg: string; type: "success" | "error" }) {
   return (
     <div className="fixed bottom-5 right-5 z-[100] px-4 py-3 rounded-xl text-sm font-medium shadow-elegant animate-fade-up"
@@ -38,7 +54,7 @@ export function Invoices() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
-  const [form, setForm] = useState<Partial<Invoice>>({ client_id: "", project_id: "", items: [{ ...emptyItem }], status: "draft", due_date: "", notes: "", tax: 0 });
+  const [form, setForm] = useState<Partial<Invoice>>({ client_id: "", project_id: "", currency: "USD", items: [{ ...emptyItem }], status: "draft", due_date: "", notes: "", tax: 0 });
 
   const showToast = (msg: string, type: "success" | "error" = "success") => { setToast({ msg, type }); setTimeout(() => setToast(null), 3000); };
 
@@ -78,10 +94,27 @@ export function Invoices() {
   const save = async () => {
     if (!form.client_id) { showToast("Please select a client", "error"); return; }
     setSaving(true);
-    const payload = { ...form, subtotal, tax: form.tax ?? 0, total, invoice_number: nextNum() };
+    const payload = {
+      ...form,
+      // Fix: send null instead of empty string for optional UUID fields
+      project_id: form.project_id || null,
+      due_date: form.due_date || null,
+      subtotal,
+      tax: form.tax ?? 0,
+      total,
+      currency: form.currency ?? "USD",
+      invoice_number: nextNum(),
+    };
     const { data, error } = await supabase.from("invoices").insert([payload]).select().single();
-    if (error) showToast("Failed to create invoice", "error");
-    else { setInvoices(p => [data, ...p]); showToast("Invoice created"); setModal(false); setForm({ client_id: "", project_id: "", items: [{ ...emptyItem }], status: "draft", due_date: "", notes: "", tax: 0 }); }
+    if (error) {
+      console.error("Invoice create error:", error);
+      showToast(`Failed: ${error.message}`, "error");
+    } else {
+      setInvoices(p => [data, ...p]);
+      showToast("Invoice created");
+      setModal(false);
+      setForm({ client_id: "", project_id: "", currency: "USD", items: [{ ...emptyItem }], status: "draft", due_date: "", notes: "", tax: 0 });
+    }
     setSaving(false);
   };
 
@@ -133,7 +166,7 @@ export function Invoices() {
           { label: "Total", value: stats.total, color: "oklch(0.66 0.22 295)" },
           { label: "Sent", value: stats.sent, color: "oklch(0.62 0.21 240)" },
           { label: "Paid", value: stats.paid, color: "oklch(0.62 0.20 145)" },
-          { label: "Revenue", value: `$${stats.revenue.toLocaleString()}`, color: "oklch(0.62 0.20 145)" },
+          { label: "Revenue", value: loading ? "—" : `$${stats.revenue.toLocaleString()}`, color: "oklch(0.62 0.20 145)" },
         ].map(s => (
           <div key={s.label} className="px-4 py-3 rounded-xl" style={S.card}>
             <div className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={S.subtle}>{s.label}</div>
@@ -166,6 +199,12 @@ export function Invoices() {
                 </select>
               </div>
               <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={S.subtle}>Currency</label>
+                <select value={form.currency ?? "USD"} onChange={e => setForm(p => ({ ...p, currency: e.target.value as "USD" | "INR" }))} className="w-full px-3 py-2.5 text-sm focus:outline-none" style={S.input}>
+                  {CURRENCIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                </select>
+              </div>
+              <div>
                 <label className="block text-[11px] font-semibold uppercase tracking-wider mb-1.5" style={S.subtle}>Due Date</label>
                 <input type="date" value={form.due_date} onChange={e => setForm(p => ({ ...p, due_date: e.target.value }))} className="w-full px-3 py-2.5 text-sm focus:outline-none" style={S.input} />
               </div>
@@ -185,14 +224,14 @@ export function Invoices() {
               </div>
               <div className="rounded-xl overflow-hidden" style={{ border: "1px solid oklch(1 0 0 / 0.08)" }}>
                 <div className="grid grid-cols-12 gap-2 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider" style={{ background: "oklch(1 0 0 / 0.04)", color: "oklch(0.42 0.012 285)" }}>
-                  <span className="col-span-5">Description</span><span className="col-span-2 text-center">Qty</span><span className="col-span-2 text-center">Rate ($)</span><span className="col-span-2 text-right">Amount</span><span className="col-span-1" />
+                  <span className="col-span-5">Description</span><span className="col-span-2 text-center">Qty</span><span className="col-span-2 text-center">Rate ({sym(form.currency)})</span><span className="col-span-2 text-right">Amount</span><span className="col-span-1" />
                 </div>
                 {(form.items ?? []).map((item, idx) => (
                   <div key={idx} className="grid grid-cols-12 gap-2 items-center px-3 py-2" style={{ borderTop: "1px solid oklch(1 0 0 / 0.06)" }}>
                     <input value={item.description} onChange={e => updateItem(idx, "description", e.target.value)} placeholder="Service description" className="col-span-5 px-2 py-1.5 text-xs focus:outline-none rounded-lg" style={S.input} />
                     <input type="number" value={item.quantity} onChange={e => updateItem(idx, "quantity", Number(e.target.value))} className="col-span-2 px-2 py-1.5 text-xs text-center focus:outline-none rounded-lg" style={S.input} />
                     <input type="number" value={item.rate} onChange={e => updateItem(idx, "rate", Number(e.target.value))} className="col-span-2 px-2 py-1.5 text-xs text-center focus:outline-none rounded-lg" style={S.input} />
-                    <div className="col-span-2 text-right text-xs font-semibold" style={S.heading}>${item.amount.toLocaleString()}</div>
+                    <div className="col-span-2 text-right text-xs font-semibold" style={S.heading}>{fmt(item.amount, form.currency)}</div>
                     <button onClick={() => setForm(p => ({ ...p, items: (p.items ?? []).filter((_, i) => i !== idx) }))} className="col-span-1 flex justify-center transition-colors hover:text-red-400" style={S.subtle}><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
                 ))}
@@ -201,9 +240,9 @@ export function Invoices() {
 
             {/* Totals */}
             <div className="rounded-xl p-4 mb-4 space-y-1.5 text-sm" style={{ background: "oklch(1 0 0 / 0.04)", border: "1px solid oklch(1 0 0 / 0.07)" }}>
-              <div className="flex justify-between" style={S.subtle}><span>Subtotal</span><span>${subtotal.toLocaleString()}</span></div>
-              {(form.tax ?? 0) > 0 && <div className="flex justify-between" style={S.subtle}><span>Tax ({form.tax}%)</span><span>${taxAmt.toFixed(2)}</span></div>}
-              <div className="flex justify-between font-semibold pt-1.5" style={{ ...S.heading, borderTop: "1px solid oklch(1 0 0 / 0.08)" }}><span>Total</span><span>${total.toLocaleString()}</span></div>
+              <div className="flex justify-between" style={S.subtle}><span>Subtotal</span><span>{fmt(subtotal, form.currency)}</span></div>
+              {(form.tax ?? 0) > 0 && <div className="flex justify-between" style={S.subtle}><span>Tax ({form.tax}%)</span><span>{fmt(taxAmt, form.currency)}</span></div>}
+              <div className="flex justify-between font-semibold pt-1.5" style={{ ...S.heading, borderTop: "1px solid oklch(1 0 0 / 0.08)" }}><span>Total</span><span>{fmt(total, form.currency)}</span></div>
             </div>
 
             <div>
@@ -255,16 +294,16 @@ export function Invoices() {
                   <tr key={i} style={{ borderBottom: "1px solid oklch(1 0 0 / 0.05)" }}>
                     <td className="py-2.5" style={S.body}>{item.description}</td>
                     <td className="py-2.5 text-right" style={S.subtle}>{item.quantity}</td>
-                    <td className="py-2.5 text-right" style={S.subtle}>${item.rate}</td>
-                    <td className="py-2.5 text-right font-medium" style={S.heading}>${item.amount.toLocaleString()}</td>
+                    <td className="py-2.5 text-right" style={S.subtle}>{sym(preview.currency)}{item.rate}</td>
+                    <td className="py-2.5 text-right font-medium" style={S.heading}>{fmt(item.amount, preview.currency)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             <div className="rounded-xl p-4 space-y-1.5 text-sm mb-4" style={{ background: "oklch(1 0 0 / 0.04)" }}>
-              <div className="flex justify-between" style={S.subtle}><span>Subtotal</span><span>${preview.subtotal?.toLocaleString()}</span></div>
-              {(preview.tax ?? 0) > 0 && <div className="flex justify-between" style={S.subtle}><span>Tax ({preview.tax}%)</span><span>${((preview.subtotal ?? 0) * (preview.tax ?? 0) / 100).toFixed(2)}</span></div>}
-              <div className="flex justify-between font-bold pt-1.5" style={{ ...S.heading, borderTop: "1px solid oklch(1 0 0 / 0.08)" }}><span>Total</span><span>${preview.total?.toLocaleString()}</span></div>
+              <div className="flex justify-between" style={S.subtle}><span>Subtotal</span><span>{fmt(preview.subtotal ?? 0, preview.currency)}</span></div>
+              {(preview.tax ?? 0) > 0 && <div className="flex justify-between" style={S.subtle}><span>Tax ({preview.tax}%)</span><span>{fmt((preview.subtotal ?? 0) * (preview.tax ?? 0) / 100, preview.currency)}</span></div>}
+              <div className="flex justify-between font-bold pt-1.5" style={{ ...S.heading, borderTop: "1px solid oklch(1 0 0 / 0.08)" }}><span>Total</span><span>{fmt(preview.total ?? 0, preview.currency)}</span></div>
             </div>
             {preview.notes && <p className="text-xs mb-4 p-3 rounded-xl" style={{ ...S.subtle, background: "oklch(1 0 0 / 0.03)", border: "1px solid oklch(1 0 0 / 0.06)" }}>{preview.notes}</p>}
             <div className="flex gap-2">
@@ -315,7 +354,7 @@ export function Invoices() {
                   <tr key={inv.id} className="transition-colors hover:bg-white/[0.02]" style={i < invoices.length - 1 ? { borderBottom: "1px solid oklch(1 0 0 / 0.05)" } : {}}>
                     <td className="px-5 py-3.5 font-semibold" style={S.heading}>{inv.invoice_number}</td>
                     <td className="px-5 py-3.5" style={S.body}>{clientName(inv.client_id)}</td>
-                    <td className="px-5 py-3.5 font-semibold" style={S.heading}>${(inv.total ?? 0).toLocaleString()}</td>
+                    <td className="px-5 py-3.5 font-semibold" style={S.heading}>{fmt(inv.total ?? 0, inv.currency)}</td>
                     <td className="px-5 py-3.5">
                       <span className="text-[10px] px-2 py-0.5 rounded-full font-medium capitalize" style={statusStyle[inv.status ?? "draft"]}>{inv.status}</span>
                     </td>

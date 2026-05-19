@@ -8,6 +8,10 @@ alter table if exists leads
   add column if not exists notes text,
   add column if not exists status text default 'new';
 
+-- Add currency to invoices if table already exists
+alter table if exists invoices
+  add column if not exists currency text default 'USD';
+
 -- If leads table doesn't exist yet:
 create table if not exists leads (
   id uuid default gen_random_uuid() primary key,
@@ -59,6 +63,7 @@ create table if not exists invoices (
   invoice_number text,
   client_id uuid references clients(id) on delete cascade not null,
   project_id uuid references projects(id) on delete set null,
+  currency text default 'USD',
   items jsonb default '[]'::jsonb,
   subtotal numeric default 0,
   tax numeric default 0,
