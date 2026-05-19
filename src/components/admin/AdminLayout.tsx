@@ -3,7 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import {
   LayoutDashboard, Users, Briefcase, FileText, Zap,
-  LogOut, Menu, X, ChevronRight, UserCheck,
+  LogOut, Menu, X, UserCheck, Bell, Settings,
 } from "lucide-react";
 import logo from "@/assets/hospiq-logo.svg";
 
@@ -23,49 +23,54 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const path = location.pathname;
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-60 flex flex-col border-r border-border bg-background/95 backdrop-blur-xl transition-transform duration-300 lg:translate-x-0 ${
-          open ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
+    <div className="flex min-h-screen" style={{ background: "oklch(0.07 0.025 285)" }}>
+      {/* ── Sidebar ── */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-56 flex flex-col transition-transform duration-300 lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
+        style={{ background: "oklch(0.09 0.03 285)", borderRight: "1px solid oklch(1 0 0 / 0.07)" }}>
+
         {/* Logo */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-border">
-          <img src={logo} alt="Hospiq" className="h-7 w-auto" />
+        <div className="flex items-center h-14 px-4" style={{ borderBottom: "1px solid oklch(1 0 0 / 0.07)" }}>
+          <img src={logo} alt="Hospiq" className="h-6 w-auto" />
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+          <div className="px-3 py-2 mb-1">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.15em]" style={{ color: "oklch(0.42 0.012 285)" }}>Menu</span>
+          </div>
           {nav.map(({ label, href, icon: Icon }) => {
             const active = path === href || (href !== "/admin" && path.startsWith(href));
             return (
-              <Link
-                key={href}
-                to={href}
-                onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all group ${
+              <Link key={href} to={href} onClick={() => setOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
                   active
-                    ? "bg-primary/15 text-primary font-medium"
-                    : "text-subtle hover:text-body hover:bg-surface"
+                    ? "font-medium"
+                    : "hover:bg-white/5"
                 }`}
+                style={active
+                  ? { background: "oklch(0.66 0.22 295 / 0.15)", color: "oklch(0.78 0.18 295)" }
+                  : { color: "oklch(0.58 0.02 285)" }
+                }
               >
                 <Icon className="w-4 h-4 shrink-0" />
                 {label}
-                {active && <ChevronRight className="w-3 h-3 ml-auto opacity-60" />}
+                {active && <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.66 0.22 295)" }} />}
               </Link>
             );
           })}
         </nav>
 
         {/* User */}
-        <div className="px-3 py-4 border-t border-border">
-          <div className="flex items-center gap-3 px-3 py-2 rounded-xl glass">
-            <div className="w-7 h-7 rounded-full bg-gradient-brand grid place-items-center text-white text-xs font-bold shrink-0">
+        <div className="p-3" style={{ borderTop: "1px solid oklch(1 0 0 / 0.07)" }}>
+          <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg" style={{ background: "oklch(1 0 0 / 0.04)" }}>
+            <div className="w-7 h-7 rounded-full grid place-items-center text-white text-xs font-bold shrink-0 bg-gradient-brand">
               {user?.email?.charAt(0).toUpperCase()}
             </div>
-            <span className="text-xs text-subtle truncate flex-1">{user?.email}</span>
-            <button onClick={signOut} className="text-dim hover:text-body transition-colors">
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium truncate" style={{ color: "oklch(0.78 0.015 285)" }}>Admin</div>
+              <div className="text-[10px] truncate" style={{ color: "oklch(0.48 0.012 285)" }}>{user?.email}</div>
+            </div>
+            <button onClick={signOut} className="shrink-0 p-1 rounded hover:bg-white/10 transition-colors" style={{ color: "oklch(0.48 0.012 285)" }}>
               <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -73,28 +78,35 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Mobile overlay */}
-      {open && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
-          onClick={() => setOpen(false)}
-        />
-      )}
+      {open && <div className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={() => setOpen(false)} />}
 
-      {/* Main */}
-      <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
+      {/* ── Main ── */}
+      <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex items-center gap-4 h-14 px-5 border-b border-border bg-background/90 backdrop-blur-xl">
-          <button
-            onClick={() => setOpen(true)}
-            className="lg:hidden text-subtle hover:text-body transition-colors"
-          >
+        <header className="sticky top-0 z-30 flex items-center h-14 px-5 gap-4"
+          style={{ background: "oklch(0.07 0.025 285 / 0.9)", borderBottom: "1px solid oklch(1 0 0 / 0.07)", backdropFilter: "blur(20px)" }}>
+          <button onClick={() => setOpen(true)} className="lg:hidden" style={{ color: "oklch(0.52 0.015 285)" }}>
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex-1" />
-          <span className="text-xs text-dim hidden sm:block">{user?.email}</span>
+
+          {/* Page title from path */}
+          <div className="flex-1">
+            <span className="text-sm font-medium capitalize" style={{ color: "oklch(0.78 0.015 285)" }}>
+              {path === "/admin" ? "Dashboard" : path.replace("/admin/", "")}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button className="w-8 h-8 rounded-lg grid place-items-center transition-colors hover:bg-white/5" style={{ color: "oklch(0.52 0.015 285)" }}>
+              <Bell className="w-4 h-4" />
+            </button>
+            <div className="w-8 h-8 rounded-full grid place-items-center text-white text-xs font-bold bg-gradient-brand">
+              {user?.email?.charAt(0).toUpperCase()}
+            </div>
+          </div>
         </header>
 
-        <main className="flex-1 p-5 sm:p-8">
+        <main className="flex-1 p-6">
           {children}
         </main>
       </div>
