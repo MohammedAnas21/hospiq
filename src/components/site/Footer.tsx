@@ -1,4 +1,4 @@
-import { Instagram, Linkedin, Twitter, Mail } from "lucide-react";
+import { Instagram, Linkedin, Twitter, Mail, Phone, MessageCircle, Headphones } from "lucide-react";
 import logo from "@/assets/hospiq-logo.svg";
 
 const cols = [
@@ -14,18 +14,32 @@ export function Footer() {
         <div className="grid lg:grid-cols-[1.4fr_1fr_1fr_1fr] gap-10 mb-14">
           <div>
             <div className="flex items-center mb-5">
-              <img src={logo} alt="Hospiq" className="h-8 w-auto" />
+              <img src={logo} alt="Hospiq" className="h-9 w-auto" />
             </div>
             <p className="text-sm text-subtle max-w-sm leading-relaxed">
               AI-powered digital experiences for modern hospitality brands —
               premium websites, AI receptionists, and automation built for global scale.
             </p>
             <a
-              href="mailto:hello@hospiq.com"
+              href="mailto:hello.hospiq@gmail.com"
               className="mt-5 inline-flex items-center gap-2 text-sm text-body hover:text-heading transition-colors"
             >
-              <Mail className="w-4 h-4 text-primary" /> hello@hospiq.com
+              <Mail className="w-4 h-4 text-primary" /> hello.hospiq@gmail.com
             </a>
+            <div className="mt-3 space-y-1.5">
+              <a href="tel:+918618957790" className="inline-flex items-center gap-2 text-sm text-subtle hover:text-body transition-colors">
+                <Phone className="w-4 h-4 text-primary" /> +91 8618957790
+              </a>
+              <a href="tel:+919741657214" className="inline-flex items-center gap-2 text-sm text-subtle hover:text-body transition-colors">
+                <Phone className="w-4 h-4 text-primary" /> +91 9741657214
+              </a>
+              <p className="flex items-center gap-2 text-xs text-dim mt-2">
+                <MessageCircle className="w-3.5 h-3.5 text-primary" /> Replies via email or WhatsApp
+              </p>
+              <a href="mailto:hospiq.support@gmail.com" className="inline-flex items-center gap-2 text-sm text-subtle hover:text-body transition-colors">
+                <Headphones className="w-4 h-4 text-primary" /> hospiq.support@gmail.com
+              </a>
+            </div>
           </div>
 
           {cols.map((c) => (

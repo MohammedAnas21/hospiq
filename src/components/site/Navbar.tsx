@@ -31,7 +31,7 @@ export function Navbar() {
             <img
               src={logo}
               alt="Hospiq"
-              className="h-8 w-auto transition-opacity duration-300 group-hover:opacity-80"
+              className="h-9 w-auto transition-opacity duration-300 group-hover:opacity-75"
             />
           </a>
 

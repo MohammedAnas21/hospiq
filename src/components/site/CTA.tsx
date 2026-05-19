@@ -21,14 +21,14 @@ export function CTA() {
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <a
-                href="mailto:hello@hospiq.com"
+                href="mailto:hello.hospiq@gmail.com"
                 className="group inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-brand text-white font-medium shadow-glow hover:opacity-95 transition-all"
               >
                 Start Your Project
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
               </a>
               <a
-                href="mailto:hello@hospiq.com"
+                href="tel:+918618957790"
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl glass text-body hover:bg-surface-strong transition-colors"
               >
                 Book a Call
